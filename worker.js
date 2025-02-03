@@ -16,6 +16,7 @@ export default {
 
     // Check for Telegram message update
     const message = update.message;
+    console.log(message);
     if (!message || !message.text) {
       return new Response('No message text provided', { status: 200 });
     }
@@ -60,6 +61,7 @@ export default {
       recipeContent = recipeContent.replace(/<img[^>]*>/g, '');
       recipeContent = recipeContent.split(" ").slice(0, 6000).join(" ");
     } catch (err) {
+      sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error fetching recipe content: ' + err);
       return new Response('Error fetching recipe content', { status: 200 });
     }
 
@@ -88,7 +90,6 @@ notes: |
 3. Add minced garlic and red pepper flakes to the oil and cook until fragrant, about 1 minute.
     `;
     const prompt = `Summarize the following recipe:\n\n${recipeContent}`;
-    console.log(prompt);
 
     let summary;
     try {
@@ -107,13 +108,14 @@ notes: |
         })
       });
       if (!openaiResponse.ok) {
-        console.error('OpenAI API error:', openaiResponse);
+        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'OpenAI API error: ' + openaiResponse);
         return new Response('Failed to summarize recipe', { status: 500 });
       }
       const data = await openaiResponse.json();
       console.log(data);
       summary = data.choices && data.choices[0] && data.choices[0].message.content;
     } catch (err) {
+      sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error calling summarization API: ' + err);
       return new Response('Error calling summarization API', { status: 500 });
     }
 
@@ -123,7 +125,6 @@ notes: |
 
     // Format the markdown content with the summary and original link
     const markdownContent = `# Recipe Summary\n\n${summary.trim()}\n\n[Original Recipe](${recipeUrl})\n`;
-    console.log(markdownContent);
     const recipe = markdownContent.match("```markdown\n((\n|.)*)```")[1]
 
     // Encode the markdown content in Base64 use TextEncoder
@@ -142,7 +143,6 @@ notes: |
         content: encodedContent,
         branch: env.GITHUB_BRANCH || 'main'
     });
-    console.log(body);
     try {
       const githubResponse = await fetch(githubApiUrl, {
         method: 'PUT',
@@ -156,13 +156,16 @@ notes: |
         body: body
       });
       if (!githubResponse.ok) {
-        console.error('GitHub API error:', githubResponse);
+        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'GitHub API error: ' + githubResponse);
         return new Response('Failed to push markdown file to GitHub', { status: 500 });
       }
     } catch (err) {
-        console.error(err);
+      console.error(err);
       return new Response('Error pushing file to GitHub', { status: 500 });
     }
+
+    // Send update message to Telegram chat using helper function
+    await sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Recipe summarized and pushed successfully!');
 
     return new Response('Recipe summarized and pushed successfully!', { status: 200 });
   }
@@ -219,3 +222,19 @@ function base64ArrayBuffer(arrayBuffer) {
     
     return base64
   }
+
+// Helper function to send a message to Telegram chat
+async function sendTelegramMessage(token, chatId, messageText) {
+  try {
+    const response = await fetch(`https://api.telegram.org/${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: messageText })
+    });
+    if (!response.ok) {
+      console.error('Failed to send Telegram update message:', await response.text());
+    }
+  } catch (err) {
+    console.error('Error sending Telegram update message:', err);
+  }
+}
