@@ -35,6 +35,7 @@ export default {
     try {
       const recipeResponse = await fetch(recipeUrl);
       if (!recipeResponse.ok) {
+        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Failed to fetch recipe content: ' + recipeResponse);
         return new Response('Failed to fetch recipe content', { status: 200 });
       }
       
@@ -59,7 +60,9 @@ export default {
       recipeContent = accumulator.accumulated;
       // replace image contents with empty string
       recipeContent = recipeContent.replace(/<img[^>]*>/g, '');
-      recipeContent = recipeContent.split(" ").slice(0, 6000).join(" ");
+      recipeContent = recipeContent.split(" ").filter(x => {
+        return x.trim()
+      }).slice(0, 6000).join(" ");
     } catch (err) {
       sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error fetching recipe content: ' + err);
       return new Response('Error fetching recipe content', { status: 200 });
@@ -94,6 +97,7 @@ notes: |
 Make sure to follow the format strictly. Instructions should be outside of the \`\`\` sections. Make sure to add \`\`\` after the notes section.
 `;
     const prompt = `Summarize the following recipe:\n\n${recipeContent}`;
+    console.log(prompt);
 
     let summary;
     try {
