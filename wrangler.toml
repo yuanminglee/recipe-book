@@ -1,0 +1,24 @@
+# wrangler.toml: Configuration for publishing the Cloudflare Worker
+
+name = "recipe-worker"
+type = "javascript"
+account_id = "4d4b50e9f5680d7b604782701f84b71c"  # Replace with your Cloudflare account ID
+workers_dev = true
+compatibility_date = "2023-10-01"
+
+[build]
+upload_format = "modules"
+
+[vars]
+# Environment variables available to your worker
+# OPENAI_API_URL = "https://api.deepseek.com/chat/completions"
+OPENAI_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+# OPENAI_MODEL = "deepseek-chat"
+OPENAI_MODEL = "deepseek-r1-distill-llama-70b"
+GITHUB_OWNER = "javiersuweijie"   # Replace with your GitHub username or organization
+GITHUB_REPO = "recipe-book"          # Replace with your repository name
+GITHUB_BRANCH = "main"
+
+# Note: Set sensitive keys using 'wrangler secret put', for example:
+# wrangler secret put OPENAI_API_KEY
+# wrangler secret put GITHUB_TOKEN 
