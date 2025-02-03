@@ -4,7 +4,7 @@ export default {
   async fetch(request, env, ctx) {
     // Only allow POST requests
     if (request.method !== 'POST') {
-      return new Response('Method Not Allowed', { status: 405 });
+      return new Response('Status OK', { status: 200 });
     }
 
     let update;
@@ -17,7 +17,7 @@ export default {
     // Check for Telegram message update
     const message = update.message;
     if (!message || !message.text) {
-      return new Response('No message text provided', { status: 400 });
+      return new Response('No message text provided', { status: 200 });
     }
 
     const text = message.text;
@@ -34,7 +34,7 @@ export default {
     try {
       const recipeResponse = await fetch(recipeUrl);
       if (!recipeResponse.ok) {
-        return new Response('Failed to fetch recipe content', { status: 500 });
+        return new Response('Failed to fetch recipe content', { status: 200 });
       }
       
       // Define a handler to accumulate text from the HTML
@@ -60,7 +60,7 @@ export default {
       recipeContent = recipeContent.replace(/<img[^>]*>/g, '');
       recipeContent = recipeContent.split(" ").slice(0, 6000).join(" ");
     } catch (err) {
-      return new Response('Error fetching recipe content', { status: 500 });
+      return new Response('Error fetching recipe content', { status: 200 });
     }
 
     // Prepare prompt and call OpenAI-compatible API to summarize the recipe

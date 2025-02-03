@@ -22,3 +22,6 @@ GITHUB_BRANCH = "main"
 # Note: Set sensitive keys using 'wrangler secret put', for example:
 # wrangler secret put OPENAI_API_KEY
 # wrangler secret put GITHUB_TOKEN 
+
+[observability.logs]
+enabled = true
