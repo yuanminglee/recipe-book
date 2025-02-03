@@ -69,7 +69,8 @@ export default {
     const openaiApiUrl = env.OPENAI_API_URL || 'https://api.deepseek.com/chat/completions';
     const model = env.OPENAI_MODEL || 'deepseek-chat';
     const systemPrompt = `You are an expert in cooking and food. You are given a text output of a recipe webpage and you need to convert it into a markdown file that is easy to understand and follow in the following format strictly:
-    ---
+\`\`\`markdown
+---
 layout: recipe
 title: Delicious Pasta  Delicious Pasta  Delicious Pasta  Delicious Pasta
 description: A quick and easy pasta dish perfect for weeknight dinners
@@ -88,7 +89,10 @@ notes: |
 2. While pasta cooks, heat olive oil in a large skillet over medium heat.
 
 3. Add minced garlic and red pepper flakes to the oil and cook until fragrant, about 1 minute.
-    `;
+\`\`\`
+
+Make sure to follow the format strictly. Instructions should be outside of the \`\`\` sections. 
+`;
     const prompt = `Summarize the following recipe:\n\n${recipeContent}`;
 
     let summary;
