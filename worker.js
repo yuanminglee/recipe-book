@@ -18,6 +18,7 @@ export default {
     const message = update.message;
     console.log(message);
     if (!message || !message.text) {
+        console.log("No message text provided");
       return new Response('No message text provided', { status: 200 });
     }
 
@@ -26,6 +27,7 @@ export default {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const links = text.match(urlRegex);
     if (!links) {
+        console.log("No links found in message");
       return new Response('No links found in message', { status: 200 });
     }
     const recipeUrl = links[0];
@@ -35,6 +37,7 @@ export default {
     try {
       const recipeResponse = await fetch(recipeUrl);
       if (!recipeResponse.ok) {
+        console.log("Failed to fetch recipe content");
         sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Failed to fetch recipe content: ' + recipeResponse);
         return new Response('Failed to fetch recipe content', { status: 200 });
       }
