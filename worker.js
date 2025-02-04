@@ -83,7 +83,7 @@ export default {
     // Prepare prompt and call OpenAI-compatible API to summarize the recipe
     const openaiApiUrl = env.OPENAI_API_URL || 'https://api.deepseek.com/chat/completions';
     const model = env.OPENAI_MODEL || 'deepseek-chat';
-    const systemPrompt = `You are an expert in cooking and food. You are given a text output of a recipe webpage and you need to convert it into a markdown file that is easy to understand and follow in the following format strictly:
+    const systemPrompt = `You are an expert in cooking and food. You are given a text output of a recipe webpage and you need to convert it into a markdown file in english that is easy to understand and follow in the following format strictly:
 \`\`\`markdown
 ---
 layout: recipe
@@ -107,7 +107,7 @@ notes:
 3. Add minced garlic and red pepper flakes to the oil and cook until fragrant, about 1 minute.
 \`\`\`
 
-Make sure to follow the format strictly. Ingredients can be nested and grouped into logical parts to help with readability. Instructions should be below of the yaml section by making sure to add --- after the notes content.
+Make sure to follow the format strictly. Ingredients can be nested and grouped into logical parts to help with readability. Instructions should be below of the yaml section by making sure to add --- after the notes content. If there are no recipe found, do not return any markdown content.
 `;
     const prompt = `Summarize the following recipe:\n\n${recipeContent}`;
     console.log(prompt);
@@ -129,7 +129,7 @@ Make sure to follow the format strictly. Ingredients can be nested and grouped i
         })
       });
       if (!openaiResponse.ok) {
-        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'OpenAI API error: ' + openaiResponse);
+        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, `OpenAI API error:  \`\`\`${JSON.stringify(openaiResponse)}\`\`\``);
         return new Response('Failed to summarize recipe', { status: 500 });
       }
       const data = await openaiResponse.json();
@@ -146,7 +146,13 @@ Make sure to follow the format strictly. Ingredients can be nested and grouped i
 
     // Format the markdown content with the summary and original link
     const markdownContent = `# Recipe Summary\n\n${summary.trim()}\n\n[Original Recipe](${recipeUrl})\n`;
-    const recipe = markdownContent.match("```markdown\n((\n|.)*)```")[1]
+    const match = markdownContent.match("```markdown\n((\n|.)*)```");
+    if (!match) {
+        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, `No recipe found`);
+        return new Response('No markdown content found', { status: 200 });
+    }
+    const recipe = match[1];
+    console.log(recipe);
 
     // Encode the markdown content in Base64 use TextEncoder
     const encoder = new TextEncoder('base64');

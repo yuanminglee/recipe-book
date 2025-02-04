@@ -9,6 +9,9 @@ compatibility_date = "2023-10-01"
 [build]
 upload_format = "modules"
 
+[observability.logs]
+enabled = true
+
 [vars]
 # Environment variables available to your worker
 # OPENAI_API_URL = "https://api.deepseek.com/chat/completions"
@@ -22,6 +25,3 @@ GITHUB_BRANCH = "main"
 # Note: Set sensitive keys using 'wrangler secret put', for example:
 # wrangler secret put OPENAI_API_KEY
 # wrangler secret put GITHUB_TOKEN 
-
-[observability.logs]
-enabled = true
