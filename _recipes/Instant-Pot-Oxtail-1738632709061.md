@@ -2,24 +2,23 @@
 layout: recipe
 title: Instant Pot Oxtail
 description: Super easy to make fall-off-the-bone tender & juicy Instant Pot Oxtail! Fall in love with the buttery rich beefy flavors paired with the satisfying gelatin-rich & tender pressure cooker oxtails. Comforting & delicious!
-servings: 6
+servings: 3
 prep_time: 20 minutes
 cook_time: 1 hour 30 minutes
 ingredients:
-  - 3.5 - 4 pounds (1766g) oxtails
+  - 750g oxtails
   - 1 (250g) large onion, sliced
   - 1 (466g) large russet potato, quartered
   - 3 (296g) medium carrots, cut in 1 ½ inch (4cm) chunks
-  - 8 (30g) garlic cloves, roughly chopped
+  - 3 (30g) garlic cloves, roughly chopped
   - ¼ cup (63ml) balsamic vinegar
   - 1.5 tablespoon (22.5ml) regular soy sauce
-  - 1 tablespoon (15ml) fish sauce
   - 1 tablespoon (15ml) olive oil
   - 3 tablespoons (49g) tomato paste
   - 2 (0.3g) bay leaves
   - A pinch dried oregano
   - A pinch dried thyme
-  - 1 cup (250ml) unsalted chicken stock or high quality beef stock
+  - 200ml unsalted chicken stock or high quality beef stock
 notes:
   - Ensure to brown the oxtails properly to enhance flavor.
   - Let the oxtails sit in the sauce for 10-15 minutes before serving for better flavor.
