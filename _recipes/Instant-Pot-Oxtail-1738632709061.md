@@ -23,6 +23,7 @@ ingredients:
 notes:
   - Ensure to brown the oxtails properly to enhance flavor.
   - Let the oxtails sit in the sauce for 10-15 minutes before serving for better flavor.
+  - Add mirin to the sauce for wine replacement.
 
 ---
 
