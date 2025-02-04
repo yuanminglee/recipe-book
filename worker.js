@@ -46,14 +46,25 @@ export default {
       class TextAccumulator {
         constructor() { this.accumulated = ''; }
         text(textChunk) {
-          this.accumulated += textChunk.text;
+            if (!textChunk.removed) {
+                this.accumulated += textChunk.text;
+            }
+        }
+      }
+
+      class NoopHandler {
+        text(textChunk) {
+            textChunk.remove();
         }
       }
       
       const accumulator = new TextAccumulator();
-      
+      const noopHandler = new NoopHandler();
       // Use HTMLRewriter to parse the HTML and accumulate text from the body
       const transformedResponse = new HTMLRewriter()
+        .on('img', noopHandler)
+        .on('style', noopHandler)
+        .on('script', noopHandler)
         .on('div', accumulator)
         .transform(recipeResponse);
       
@@ -62,11 +73,9 @@ export default {
       
       recipeContent = accumulator.accumulated;
       // replace image contents with empty string
-      recipeContent = recipeContent.replace(/<img[^>]*>/g, '');
-      recipeContent = recipeContent.split(" ").filter(x => {
-        return x.trim()
-      }).slice(0, 6000).join(" ");
+      recipeContent = recipeContent.split(" ").map(x => x.trim()).filter(x => x).slice(0, 6000).join(" ");
     } catch (err) {
+        console.log("Error fetching recipe content: " + err);
       sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error fetching recipe content: ' + err);
       return new Response('Error fetching recipe content', { status: 200 });
     }
@@ -98,7 +107,7 @@ notes:
 3. Add minced garlic and red pepper flakes to the oil and cook until fragrant, about 1 minute.
 \`\`\`
 
-Make sure to follow the format strictly. Ingredients can be nested. Instructions should be below of the yaml section by making sure to add --- after the notes content.
+Make sure to follow the format strictly. Ingredients can be nested and grouped into logical parts to help with readability. Instructions should be below of the yaml section by making sure to add --- after the notes content.
 `;
     const prompt = `Summarize the following recipe:\n\n${recipeContent}`;
     console.log(prompt);
