@@ -39,7 +39,18 @@ layout: default
                     <h2>Ingredients</h2>
                     <ul>
                         {% for ingredient in page.ingredients %}
-                            <li>{{ ingredient }}</li>
+                            {% if ingredient.first %}
+                                <li>
+                                    <strong>{{ ingredient.first[0] }}:</strong>
+                                    <ul>
+                                        {% for subitem in ingredient.first[1] %}
+                                            <li>{{ subitem }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                            {% else %}
+                                <li>{{ ingredient }}</li>
+                            {% endif %}
                         {% endfor %}
                     </ul>
                 </section>
@@ -48,7 +59,11 @@ layout: default
             {% if page.notes %}
                 <section class="recipe-notes">
                     <h2>Notes</h2>
-                    {{ page.notes | markdownify }}
+                    <ul>
+                        {% for note in page.notes %}
+                            <li>{{ note }}</li>
+                        {% endfor %}
+                    </ul>
                 </section>
             {% endif %}
         </div>

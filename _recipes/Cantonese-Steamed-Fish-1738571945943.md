@@ -15,7 +15,7 @@ ingredients:
   - 2 tablespoons hot water
   - 10 ounce fillet of delicate white fish (such as sea bass, grey sole, flounder, fluke, tilapia, or haddock)
   - 2 tablespoons vegetable oil
-notes: |
+notes:
   - Use any delicate white fish; avoid oily or firm fish.
   - Adjust cooking time based on fish thickness; thicker fillets take longer.
   - Check doneness by piercing with a butter knife; it should pass through easily.

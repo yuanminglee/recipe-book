@@ -85,8 +85,9 @@ prep_time: 15 minutes
 cook_time: 20 minutes
 ingredients:
   - 1 pound spaghetti
-  - 3 cloves garlic, minced
-notes: |
+  - "Pasta Sauce":
+    - 3 cloves garlic, minced
+notes:
   - You can substitute any pasta shape you prefer
 ---
 
@@ -97,7 +98,7 @@ notes: |
 3. Add minced garlic and red pepper flakes to the oil and cook until fragrant, about 1 minute.
 \`\`\`
 
-Make sure to follow the format strictly. Instructions should be outside of the --- section by making sure to add --- after the notes section.
+Make sure to follow the format strictly. Ingredients can be nested. Instructions should be below of the yaml section by making sure to add --- after the notes content.
 `;
     const prompt = `Summarize the following recipe:\n\n${recipeContent}`;
     console.log(prompt);

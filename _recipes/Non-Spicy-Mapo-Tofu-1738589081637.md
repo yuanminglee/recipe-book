@@ -12,16 +12,16 @@ ingredients:
   - ¼ lb ground pork
   - 1 stalk scallion, chopped with green parts separated from the white
   - ¾ cup chicken stock
-  - Sauce
+  - Sauce:
     - 1 tablespoon bean sauce
     - 1 tablespoon oyster sauce
     - 1 tablespoon soy sauce
     - 1 tablespoon Shaoxing wine
     - 1 tablespoon black vinegar
-  - Cornstarch Slurry
+  - "Cornstarch Slurry":
     - 1 tablespoon cornstarch
     - 1 tablespoon water
-notes: |
+notes:
   - For a vegetarian option, omit the ground pork and use vegetable stock.
   - Add chili paste or chili oil for a spicy version.
   - Adjust the sauce quantity to your preference.

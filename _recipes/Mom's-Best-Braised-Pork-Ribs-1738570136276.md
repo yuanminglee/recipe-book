@@ -23,7 +23,7 @@ ingredients:
     - 2 red potatoes (or waxy potatoes), chopped
     - 3 carrots, chopped
     - 1/2 lb (227 g) green beans
-notes: |
+notes:
   - Contrary to the common practice of selecting meaty ribs, Chinese cooking prefers smaller ribs with thin layers of meat, so the meat will be more flavorful. When you purchase the ribs, ask the butcher to saw the ribs crosswise into two shorter slabs. Then you can cut them into one-bone sections at home. Cutting the ribs into shorter sections makes serving easier and the meat more flavorful.
   - Alternatively, you can transfer the pork and vegetables into a large bowl. Then reduce the sauce by turning to medium high heat for 15 to 30 minutes, until it’s thick enough to coat the back of a spoon.
 
