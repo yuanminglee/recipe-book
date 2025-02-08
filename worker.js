@@ -129,8 +129,9 @@ Make sure to follow the format strictly. Ingredients can be nested and grouped i
         })
       });
       if (!openaiResponse.ok) {
+        console.log("OpenAI API error: " + JSON.stringify(openaiResponse));
         sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, `OpenAI API error:  \`\`\`${JSON.stringify(openaiResponse)}\`\`\``);
-        return new Response('Failed to summarize recipe', { status: 500 });
+        return new Response('Failed to summarize recipe', { status: 200 });
       }
       const data = await openaiResponse.json();
       console.log(data);
