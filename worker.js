@@ -23,17 +23,17 @@ export default {
     }
 
     const text = message.text;
+    let recipeContent;
     // Extract the first URL from the message text
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const links = text.match(urlRegex);
     if (!links) {
-        console.log("No links found in message");
-      return new Response('No links found in message', { status: 200 });
+        console.log("No links found in message, using text as recipe content");
+        recipeContent = text;
     }
     const recipeUrl = links[0];
 
     // Fetch the recipe content from the URL and extract only plain text using HTMLRewriter
-    let recipeContent;
     try {
       const recipeResponse = await fetch(recipeUrl);
       if (!recipeResponse.ok) {
