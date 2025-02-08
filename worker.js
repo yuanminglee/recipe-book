@@ -45,7 +45,7 @@ export default {
 \`\`\`markdown
 ---
 layout: recipe
-title: Delicious Pasta  Delicious Pasta  Delicious Pasta  Delicious Pasta
+title: Delicious Pasta
 description: A quick and easy pasta dish perfect for weeknight dinners
 servings: 4
 prep_time: 15 minutes
