@@ -27,57 +27,15 @@ export default {
     // Extract the first URL from the message text
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const links = text.match(urlRegex);
-    if (!links) {
+    if (!links || text.length > 1000) {
         console.log("No links found in message, using text as recipe content");
         recipeContent = text;
-    }
-    const recipeUrl = links[0];
-
-    // Fetch the recipe content from the URL and extract only plain text using HTMLRewriter
-    try {
-      const recipeResponse = await fetch(recipeUrl);
-      if (!recipeResponse.ok) {
-        console.log("Failed to fetch recipe content");
-        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Failed to fetch recipe content: ' + recipeResponse);
-        return new Response('Failed to fetch recipe content', { status: 200 });
+    } else {
+      const recipeUrl = links[0];
+      [recipeContent, response] = await getRecipeContent(recipeUrl);
+      if (response) {
+        return response;
       }
-      
-      // Define a handler to accumulate text from the HTML
-      class TextAccumulator {
-        constructor() { this.accumulated = ''; }
-        text(textChunk) {
-            if (!textChunk.removed) {
-                this.accumulated += textChunk.text;
-            }
-        }
-      }
-
-      class NoopHandler {
-        text(textChunk) {
-            textChunk.remove();
-        }
-      }
-      
-      const accumulator = new TextAccumulator();
-      const noopHandler = new NoopHandler();
-      // Use HTMLRewriter to parse the HTML and accumulate text from the body
-      const transformedResponse = new HTMLRewriter()
-        .on('img', noopHandler)
-        .on('style', noopHandler)
-        .on('script', noopHandler)
-        .on('div', accumulator)
-        .transform(recipeResponse);
-      
-      // Drain the stream to ensure all text is processed
-      await transformedResponse.arrayBuffer();
-      
-      recipeContent = accumulator.accumulated;
-      // replace image contents with empty string
-      recipeContent = recipeContent.split(" ").map(x => x.trim()).filter(x => x).slice(0, 6000).join(" ");
-    } catch (err) {
-        console.log("Error fetching recipe content: " + err);
-      sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error fetching recipe content: ' + err);
-      return new Response('Error fetching recipe content', { status: 200 });
     }
 
     // Prepare prompt and call OpenAI-compatible API to summarize the recipe
@@ -146,7 +104,7 @@ Make sure to follow the format strictly. Ingredients can be nested and grouped i
     }
 
     // Format the markdown content with the summary and original link
-    const markdownContent = `# Recipe Summary\n\n${summary.trim()}\n\n[Original Recipe](${recipeUrl})\n`;
+    const markdownContent = `# Recipe Summary\n\n${summary.trim()}\n`;
     const match = markdownContent.match("```markdown\n((\n|.)*)```");
     if (!match) {
         sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, `No recipe found`);
@@ -250,6 +208,56 @@ function base64ArrayBuffer(arrayBuffer) {
     
     return base64
   }
+
+async function getRecipeContent(url) {
+    // Fetch the recipe content from the URL and extract only plain text using HTMLRewriter
+    try {
+      const recipeResponse = await fetch(url);
+      if (!recipeResponse.ok) {
+        console.log("Failed to fetch recipe content");
+        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Failed to fetch recipe content: ' + recipeResponse);
+        return ["", new Response('Failed to fetch recipe content', { status: 200 })]
+      }
+      
+      // Define a handler to accumulate text from the HTML
+      class TextAccumulator {
+        constructor() { this.accumulated = ''; }
+        text(textChunk) {
+            if (!textChunk.removed) {
+                this.accumulated += textChunk.text;
+            }
+        }
+      }
+
+      class NoopHandler {
+        text(textChunk) {
+            textChunk.remove();
+        }
+      }
+      
+      const accumulator = new TextAccumulator();
+      const noopHandler = new NoopHandler();
+      // Use HTMLRewriter to parse the HTML and accumulate text from the body
+      const transformedResponse = new HTMLRewriter()
+        .on('img', noopHandler)
+        .on('style', noopHandler)
+        .on('script', noopHandler)
+        .on('div', accumulator)
+        .transform(recipeResponse);
+      
+      // Drain the stream to ensure all text is processed
+      await transformedResponse.arrayBuffer();
+      
+      recipeContent = accumulator.accumulated;
+      // replace image contents with empty string
+      recipeContent = recipeContent.split(" ").map(x => x.trim()).filter(x => x).slice(0, 6000).join(" ");
+    } catch (err) {
+        console.log("Error fetching recipe content: " + err);
+      sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error fetching recipe content: ' + err);
+      return ["", new Response('Error fetching recipe content', { status: 200 })];
+    }
+    return [recipeContent, null];
+}
 
 // Helper function to send a message to Telegram chat
 async function sendTelegramMessage(token, chatId, messageText) {
