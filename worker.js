@@ -11,7 +11,7 @@ export default {
     try {
       update = await request.json();
     } catch (e) {
-      return new Response('Bad Request: invalid JSON', { status: 400 });
+      return new Response('Bad Request: invalid JSON', { status: 200 });
     }
 
     // Check for Telegram message update
@@ -67,7 +67,7 @@ notes:
 
 Make sure to follow the format strictly. Ingredients can be nested and grouped into logical parts to help with readability. Instructions should be below of the yaml section by making sure to add --- after the notes content. If there are no recipe found, do not return any markdown content. Provide metric measurements for weight and volume in brackets.
 `;
-    const prompt = `Summarize the following recipe:\n\n${recipeContent}`;
+    const prompt = `Start of recipe\n\n${recipeContent}\n\n End of recipe`;
     console.log(prompt);
 
     let summary;
@@ -96,11 +96,11 @@ Make sure to follow the format strictly. Ingredients can be nested and grouped i
       summary = data.choices && data.choices[0] && data.choices[0].message.content;
     } catch (err) {
       sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error calling summarization API: ' + err);
-      return new Response('Error calling summarization API', { status: 500 });
+      return new Response('Error calling summarization API', { status: 200 });
     }
 
     if (!summary) {
-      return new Response('No summary produced', { status: 500 });
+      return new Response('No summary produced', { status: 200 });
     }
 
     // Format the markdown content with the summary and original link
@@ -143,11 +143,11 @@ Make sure to follow the format strictly. Ingredients can be nested and grouped i
       });
       if (!githubResponse.ok) {
         sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'GitHub API error: ' + githubResponse);
-        return new Response('Failed to push markdown file to GitHub', { status: 500 });
+        return new Response('Failed to push markdown file to GitHub', { status: 200 });
       }
     } catch (err) {
       console.error(err);
-      return new Response('Error pushing file to GitHub', { status: 500 });
+      return new Response('Error pushing file to GitHub', { status: 200 });
     }
 
     // Send update message to Telegram chat using helper function
