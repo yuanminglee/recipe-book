@@ -16,9 +16,9 @@ notes:
   - For better flavor, you can marinate the potatoes in a little salt before slicing
 ---
 
-1. Slice the potatoes into thin rounds and shallow fry in hot oil until golden and crispy. Remove and set aside.
+1. Slice the potatoes into thin rounds and shallow fry in hot oil. Remove and set aside.
 
-2. In the same pan, add more oil if needed, then fry the sliced onions until caramelized and fragrant.
+2. In the same pan, remove oil if needed, then fry the sliced onions until caramelized and fragrant.
 
 3. Return the fried potatoes to the pan, add dark soy sauce, and stir until the potatoes are evenly coated.
 
