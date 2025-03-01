@@ -10,7 +10,7 @@ ingredients:
     - 300g minced pork
     - 1/2 teaspoon salt
     - 1/2 teaspoon sesame oil
-    - 1/2 teaspoon black pepper
+    - 1/2 teaspoon white pepper
     - 1/2 medium onion, minced
     - 1 tablespoon cornstarch
     - 1 egg (optional)
@@ -26,7 +26,7 @@ notes:
 
 ---
 
-1. In a large mixing bowl, combine minced pork, salt, sesame oil, black pepper, minced onion, and cornstarch. Mix well until just combined. If using egg, add it to the mixture and incorporate.
+1. In a large mixing bowl, combine minced pork, salt, sesame oil, white pepper, minced onion, and cornstarch. Mix well until just combined. If using egg, add it to the mixture and incorporate.
 
 2. Use your hands to shape the mixture into small, round meatballs.
 
