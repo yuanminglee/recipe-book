@@ -6,10 +6,9 @@ servings: 4
 prep_time: 2 hours
 cook_time: 12 minutes
 ingredients:
-  - "Mushrooms and Lily Flowers":
-    - 1/4 cup dried wood ear mushrooms
-    - 1/3 cup dried lily flowers
-    - 10 medium dried shiitake mushrooms
+  - 1/4 cup dried wood ear mushrooms
+  - 1/3 cup dried lily flowers
+  - 10 medium dried shiitake mushrooms
   - 1 pound (450g) boneless chicken thighs, trimmed of fat and cut into large bite-sized chunks
   - 1/4 cup water or chicken stock
   - 1 tablespoon vegetable oil

@@ -6,12 +6,12 @@ servings: 2
 prep_time: 15 minutes
 cook_time: 14 minutes
 ingredients:
-  For the Chicken:
+  - "Chicken":
     - ¾–1 lb (340–450g) boneless, skinless chicken thighs
     - ⅛ tsp Diamond Crystal kosher salt
     - ⅛ tsp freshly ground black pepper
     - 1 Tbsp neutral oil (for cooking)
-  For the Teriyaki Sauce:
+  - "Teriyaki Sauce":
     - 2 Tbsp soy sauce
     - 2 Tbsp mirin
     - 2 Tbsp sake
