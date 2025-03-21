@@ -6,13 +6,11 @@ servings: 2
 prep_time: 20 minutes
 cook_time: 25 minutes
 ingredients:
-  - Spring Onion:
-    - 3-4 stalks, thinly sliced (whites and greens separated)
+  - 3-4 stalks Spring Onion, thinly sliced (whites and greens separated)
   - 3 cloves of garlic, minced
   - 1 large shallot, minced
-  - Beef and Mushroom Topping:
-    - 300g minced beef
-    - 150g shimeiji mushrooms
+  - 300g minced beef
+  - 150g shimeiji mushrooms
   - Broth:
     - 6 cups (1500ml) low sodium beef broth
     - 1 tsp sugar
