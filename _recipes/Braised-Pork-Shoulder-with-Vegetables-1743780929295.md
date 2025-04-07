@@ -1,6 +1,6 @@
 ---
 layout: recipe
-title: Braised Pork Shoulder with Vegetables
+title: Braised Pork Shoulder with Vegetables 🐷🥘
 description: A hearty and flavorful braised pork dish with vegetables, perfect for a comforting meal
 servings: 4-6
 prep_time: 20 minutes
