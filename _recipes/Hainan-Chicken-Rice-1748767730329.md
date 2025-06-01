@@ -6,30 +6,30 @@ servings: 6
 prep_time: 30 minutes
 cook_time: 2 hours 35 minutes
 ingredients:
-  - "For the Chicken:"
+  - "For the Chicken":
     - 1 small chicken (3-3½ pounds/1.5kg, preferably Buddhist-style with head and feet on, or organic)
     - 1 tablespoon salt
     - 12-14 cups water
     - 4-5 slices ginger
     - 2 whole scallions
     - Ice
-  - "For the Rice:"
+  - "For the Rice":
     - 2 ounces chicken fat (taken from the cavity of the chicken)
     - 1 teaspoon neutral oil (such as vegetable, canola, or avocado oil)
     - 4 cloves garlic (minced)
     - 3 cups uncooked white rice (preferably jasmine rice, washed and drained)
     - Chicken stock (from cooking the chicken)
     - 2 teaspoons salt
-  - "For the Ginger-Garlic Sauce:"
+  - "For the Ginger-Garlic Sauce":
     - 4-inch piece of ginger (roughly chopped)
     - 2 cloves garlic
     - 3 tablespoons neutral oil (such as vegetable, canola, or avocado oil)
     - 1 pinch of salt
-  - "For the Sweet Dark Soy Sauce:"
+  - "For the Sweet Dark Soy Sauce":
     - 1/4 cup water
     - 1.25 ounces rock sugar (about 2 sizable chunks, or substitute 2.5 tbsp granulated sugar)
     - 1/4 cup dark soy sauce
-  - "For the Chili Sauce:"
+  - "For the Chili Sauce":
     - 3 fresh red chilies (choose a chili with medium spice level; holland chilies work well)
     - 1.5-inch piece ginger
     - 2 cloves garlic
