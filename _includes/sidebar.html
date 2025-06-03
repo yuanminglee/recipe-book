@@ -3,7 +3,7 @@
         <h2>Recipes</h2>
     </div>
     <nav class="recipe-list">
-        {% assign sorted_recipes = site.recipes %}
+        {% assign sorted_recipes = site.recipes | reverse %}
         {% for recipe in sorted_recipes %}
             <a href="{{ recipe.url | relative_url }}" class="recipe-link {% if page.url == recipe.url %}active{% endif %}">
                 {{ recipe.title }}

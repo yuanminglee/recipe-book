@@ -66,7 +66,10 @@ notes:
 3. Add minced garlic and red pepper flakes to the oil and cook until fragrant, about 1 minute.
 \`\`\`
 
-Make sure to follow the format strictly. Ingredients can be nested and grouped into logical parts to help with readability. Instructions should be below of the yaml section by making sure to add --- after the notes content. If there are no recipe found, do not return any markdown content. Provide metric measurements for weight and volume in brackets.
+IMPORTANT:Make sure to follow the format strictly. 
+Ingredients can be nested and grouped into logical parts to help with readability. When nesting ingredients, make sure to surround the key with double quotes.
+Instructions should be below of the yaml section by making sure to close the yaml section with --- after the notes section. 
+If there are no recipe found, do not return any markdown content. Provide metric measurements for weight and volume in brackets.
 `;
     const prompt = `Start of recipe\n\n${recipeContent}\n\n End of recipe`;
     console.log(prompt);
