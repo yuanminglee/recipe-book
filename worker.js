@@ -24,6 +24,7 @@ export default {
 
     const text = message.text;
     let recipeContent;
+    let response;
     // Extract the first URL from the message text
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const links = text.match(urlRegex);
@@ -32,7 +33,7 @@ export default {
         recipeContent = text;
     } else {
       const recipeUrl = links[0];
-      [recipeContent, response] = await getRecipeContent(recipeUrl);
+      [recipeContent, response] = await getRecipeContent(env.TELEGRAM_BOT_TOKEN, recipeUrl, message.chat.id);
       if (response) {
         return response;
       }
@@ -120,7 +121,7 @@ Make sure to follow the format strictly. Ingredients can be nested and grouped i
 
     // Define the file path for the new markdown file
     const timestamp = Date.now();
-    const filePath = `_recipes/${title}-${timestamp}.md`;
+    const filePath = `_recipes/${timestamp}-${title}.md`;
 
     // Prepare GitHub API URL for creating/updating a file
     const githubApiUrl = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/${filePath}`;
@@ -209,13 +210,13 @@ function base64ArrayBuffer(arrayBuffer) {
     return base64
   }
 
-async function getRecipeContent(url) {
+async function getRecipeContent(token, url, chatId) {
     // Fetch the recipe content from the URL and extract only plain text using HTMLRewriter
     try {
       const recipeResponse = await fetch(url);
       if (!recipeResponse.ok) {
         console.log("Failed to fetch recipe content");
-        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Failed to fetch recipe content: ' + recipeResponse);
+        sendTelegramMessage(token, chatId, 'Failed to fetch recipe content: ' + recipeResponse);
         return ["", new Response('Failed to fetch recipe content', { status: 200 })]
       }
       
@@ -248,15 +249,15 @@ async function getRecipeContent(url) {
       // Drain the stream to ensure all text is processed
       await transformedResponse.arrayBuffer();
       
-      recipeContent = accumulator.accumulated;
+      let recipeContent = accumulator.accumulated;
       // replace image contents with empty string
       recipeContent = recipeContent.split(" ").map(x => x.trim()).filter(x => x).slice(0, 6000).join(" ");
+      return [recipeContent, null];
     } catch (err) {
         console.log("Error fetching recipe content: " + err);
-      sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, 'Error fetching recipe content: ' + err);
+      sendTelegramMessage(token, chatId, 'Error fetching recipe content: ' + err);
       return ["", new Response('Error fetching recipe content', { status: 200 })];
     }
-    return [recipeContent, null];
 }
 
 // Helper function to send a message to Telegram chat
