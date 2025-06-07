@@ -1,5 +1,5 @@
-url: ''
-baseurl: ''
+url: 'https://yuanminglee.github.io'
+baseurl: '/recipe-book'
 title: 'Jekyllwind'
 
 plugins:
