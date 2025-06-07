@@ -45,12 +45,32 @@ export default {
         message.reply_to_message.from &&
         message.reply_to_message.from.is_bot;
 
-      // In groups, only process if bot is mentioned, it's a command, or it's a reply to the bot
-      if (!isMentioned && !isCommand && !isReplyToBot) {
+      // Check if message contains a recipe URL or seems like recipe content
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const hasUrl = urlRegex.test(text);
+      const seemsLikeRecipe =
+        text.length > 50 &&
+        (text.toLowerCase().includes("recipe") ||
+          text.toLowerCase().includes("ingredients") ||
+          text.toLowerCase().includes("cooking") ||
+          text.toLowerCase().includes("cook") ||
+          text.toLowerCase().includes("minutes") ||
+          text.toLowerCase().includes("cups") ||
+          text.toLowerCase().includes("tablespoon") ||
+          text.toLowerCase().includes("teaspoon"));
+
+      // In groups, process if: mentioned, command, reply to bot, has URL, or seems like recipe content
+      if (
+        !isMentioned &&
+        !isCommand &&
+        !isReplyToBot &&
+        !hasUrl &&
+        !seemsLikeRecipe
+      ) {
         console.log(
-          "Message in group doesn't mention bot, isn't a command, and isn't a reply to bot - ignoring"
+          "Message in group doesn't appear to be recipe-related - ignoring"
         );
-        return new Response("Message ignored - not addressed to bot", {
+        return new Response("Message ignored - not recipe-related", {
           status: 200,
         });
       }
@@ -193,11 +213,17 @@ IMPORTANT: Follow the format strictly with these requirements:
         }),
       });
       if (!openaiResponse.ok) {
-        console.log("OpenAI API error: " + JSON.stringify(openaiResponse));
+        const errorText = await openaiResponse.text();
+        const errorDetails = {
+          status: openaiResponse.status,
+          statusText: openaiResponse.statusText,
+          body: errorText,
+        };
+        console.log("OpenAI API error:", errorDetails);
         sendTelegramMessage(
           env.TELEGRAM_BOT_TOKEN,
           message.chat.id,
-          `OpenAI API error:  \`\`\`${JSON.stringify(openaiResponse)}\`\`\``
+          `OpenAI API error: ${openaiResponse.status} ${openaiResponse.statusText}\n\`\`\`${errorText}\`\`\``
         );
         return new Response("Failed to summarize recipe", { status: 200 });
       }
@@ -453,7 +479,7 @@ async function getRecipeContent(token, url, chatId) {
       .split(" ")
       .map((x) => x.trim())
       .filter((x) => x)
-      .slice(0, 6000)
+      .slice(0, 3000) // Reduced from 6000 to 3000 words to stay under token limit
       .join(" ");
     return [recipeContent, null];
   } catch (err) {

@@ -11,9 +11,7 @@ enabled = true
 
 [vars]
 # Environment variables available to your worker
-# OPENAI_API_URL = "https://api.deepseek.com/chat/completions"
 OPENAI_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-# OPENAI_MODEL = "deepseek-chat"
 OPENAI_MODEL = "deepseek-r1-distill-llama-70b"
 GITHUB_OWNER = "yuanminglee"   # Replace with your GitHub username or organization
 GITHUB_REPO = "recipe-book"          # Replace with your repository name
