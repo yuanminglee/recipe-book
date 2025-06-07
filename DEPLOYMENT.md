@@ -41,77 +41,13 @@ This project is a complete recipe collection system that consists of:
 
 ### 1.3 GitHub Actions Setup
 
-Create the workflow file for automatic deployment:
+The workflow file is already included at `.github/workflows/jekyll.yml`. It includes proper Yarn 3.x support with Corepack to avoid version conflicts.
 
-```yaml
-# .github/workflows/jekyll.yml
-name: Build and Deploy Jekyll Site
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.1'
-          bundler-cache: true
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: |
-          bundle install
-          yarn install
-
-      - name: Build CSS
-        run: yarn build-css
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Build with Jekyll
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
-        env:
-          JEKYLL_ENV: production
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-```
+**Key features of the workflow:**
+- Enables Corepack for Yarn version management
+- Uses the correct Yarn version (3.6.3) as specified in package.json
+- Builds CSS with Tailwind/PostCSS
+- Deploys to GitHub Pages automatically
 
 ## Part 2: GitHub Pages Deployment
 
@@ -237,6 +173,8 @@ yarn build-css
 
 ```bash
 bundle exec jekyll serve
+# or use the convenience script
+yarn dev
 ```
 
 Visit `http://localhost:4000` to see your site.
@@ -256,31 +194,25 @@ Instead of GitHub Pages, you can deploy to Cloudflare Pages:
 1. Go to **Cloudflare Dashboard** → **Pages**
 2. **Connect to Git** and select your repository
 3. Use these build settings:
-   - **Build command**: `bundle install && yarn install && yarn build-css && bundle exec jekyll build`
+   - **Build command**: `corepack enable && corepack prepare yarn@3.6.3 --activate && bundle install && yarn install && yarn build-css && bundle exec jekyll build`
    - **Build output directory**: `_site`
    - **Root directory**: `/`
 
 ### 6.2 Netlify Deployment
 
-For Netlify deployment:
+For Netlify deployment, the `netlify.toml` file is already configured. Just:
 
 1. Connect your GitHub repository to Netlify
-2. Use these build settings:
-   - **Build command**: `bundle install && yarn install && yarn build-css && bundle exec jekyll build`
-   - **Publish directory**: `_site`
+2. The build settings are automatically detected from `netlify.toml`
 3. Add environment variables if needed
 
 ### 6.3 Vercel Deployment
 
-For Vercel deployment, create `vercel.json`:
+For Vercel deployment, the `vercel.json` file is already configured:
 
-```json
-{
-  "buildCommand": "bundle install && yarn install && yarn build-css && bundle exec jekyll build",
-  "outputDirectory": "_site",
-  "installCommand": "bundle install && yarn install"
-}
-```
+1. Connect your GitHub repository to Vercel
+2. The build settings are automatically detected
+3. Vercel will handle the Ruby and Node.js environment setup
 
 ## Part 7: Configuration and Customization
 
@@ -326,10 +258,27 @@ const systemPrompt = `You are an expert in cooking and food. You are given a tex
 
 ### Common Issues
 
-1. **GitHub Actions failing**: Check that all secrets are set correctly
+1. **GitHub Actions failing with Yarn version mismatch**:
+   - **Problem**: "error This project's package.json defines packageManager: yarn@3.6.3"
+   - **Solution**: The workflow now includes Corepack setup to handle this automatically
+   - **Manual fix**: Ensure your workflow includes:
+     ```yaml
+     - name: Enable Corepack
+       run: corepack enable
+     - name: Use Yarn 3.6.3
+       run: corepack prepare yarn@3.6.3 --activate
+     ```
+
 2. **Worker not responding**: Verify webhook URL and bot token
+
 3. **Recipes not appearing**: Check GitHub API token permissions
+
 4. **CSS not loading**: Run `yarn build-css` and commit changes
+
+5. **Build failures on other platforms**:
+   - **Cloudflare Pages**: Make sure to include Corepack commands in build command
+   - **Netlify**: Uses the configured `netlify.toml` which handles Yarn version
+   - **Vercel**: Uses the configured `vercel.json` with proper build commands
 
 ### Debug Tips
 
@@ -337,6 +286,25 @@ const systemPrompt = `You are an expert in cooking and food. You are given a tex
 - Use `wrangler tail` to see real-time logs
 - Test the worker locally with `wrangler dev`
 - Check GitHub Actions logs for build failures
+- Verify Yarn version locally: `yarn --version` should show 3.6.3
+
+### Testing Yarn Version Issues Locally
+
+If you encounter Yarn version issues locally:
+
+```bash
+# Enable Corepack (if not already enabled)
+corepack enable
+
+# Install and activate the correct Yarn version
+corepack prepare yarn@3.6.3 --activate
+
+# Verify the version
+yarn --version  # Should output 3.6.3
+
+# Install dependencies
+yarn install
+```
 
 ## Part 9: Security Considerations
 
@@ -352,5 +320,6 @@ If you encounter issues:
 2. Review Cloudflare Worker logs
 3. Verify all environment variables are set correctly
 4. Test each component individually
+5. For Yarn issues, ensure Corepack is enabled and the correct version is active
 
 Your recipe collection system is now ready to automatically collect, process, and display recipes from Telegram!
