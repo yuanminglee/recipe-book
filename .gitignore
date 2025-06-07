@@ -3,3 +3,10 @@ _site/
 .jekyll-cache/
 .jekyll-metadata
 node_modules
+
+# Cloudflare Worker environment variables
+.dev.vars
+.env*
+
+# CSS source files (keep processed CSS for GitHub Pages)
+assets/css/main-source.css

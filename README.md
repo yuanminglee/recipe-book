@@ -1,87 +1,109 @@
-# Recipe Book
+# Recipe Book Jekyll Site
 
-A Jekyll-based recipe collection site with AI-powered recipe generation, deployed on Cloudflare Workers.
+A Jekyll-powered recipe collection with Tailwind CSS styling.
 
 ## Development Setup
 
 ### Prerequisites
 
-- Ruby and Jekyll
-- Node.js and Yarn
-- Wrangler CLI
-
-### Jekyll Development Server
-
-1. Install Ruby dependencies:
-   ```bash
-   bundle install
-   ```
-
-2. Install Node.js dependencies:
-   ```bash
-   yarn install
-   ```
-
-3. Start the Jekyll development server with live reload:
-   ```bash
-   bundle exec jekyll serve --livereload
-   ```
-
-   The site will be available at `http://localhost:4000` with automatic browser refresh on file changes.
-
-## Testing with Wrangler
+- Ruby 3.3+
+- Node.js 18+
+- Yarn package manager
 
 ### Local Development
 
-1. Test the Cloudflare Worker locally:
+1. **Install dependencies:**
+
    ```bash
-   yarn wrangler dev
+   bundle install
+   yarn install
    ```
 
-   This starts a local development server for the worker at `http://localhost:8787`.
+2. **Development workflow:**
 
-### Environment Setup
+   ```bash
+   # Start Jekyll development server
+   bundle exec jekyll serve --livereload
 
-Before testing, set up required secrets:
+   # In another terminal, watch CSS changes (optional)
+   yarn dev-css
+   ```
+
+### CSS Development
+
+This project uses Tailwind CSS. The source CSS file is `assets/css/main-source.css` which contains:
+
+- Tailwind directives (`@tailwind base`, etc.)
+- Custom CSS styles
+
+**Important:** GitHub Pages doesn't support PostCSS processing, so we pre-build the CSS.
+
+#### CSS Build Process
+
+1. **For development:** Edit `assets/css/main-source.css`
+2. **Build CSS:** Run `yarn build-css` to generate the processed `assets/css/main.css`
+3. **Commit both files** - GitHub Pages uses the processed `main.css`
+
+#### Available Scripts
 
 ```bash
-# Set your OpenAI/Groq API key
-yarn wrangler secret put OPENAI_API_KEY
+# Build CSS for production (minified)
+yarn build-css
 
-# Set your GitHub personal access token
-yarn wrangler secret put GITHUB_TOKEN
+# Watch CSS during development
+yarn dev-css
+
+# Full production build
+yarn build
 ```
-
-Update the account ID in `wrangler.toml` with your Cloudflare account ID.
 
 ## Deployment
 
-### Deploy to Cloudflare Workers
+### GitHub Pages (Automatic)
 
-1. Login to Cloudflare:
-   ```bash
-   yarn wrangler auth login
-   ```
+The site automatically deploys to GitHub Pages when you push to the `main` branch using GitHub Actions. The workflow:
 
-2. Deploy the worker:
-   ```bash
-   yarn wrangler deploy
-   ```
+1. Installs Ruby 3.3 and Node.js 18
+2. Installs dependencies (both Ruby gems and Node packages)
+3. Builds the site with Jekyll
+4. Deploys to GitHub Pages
 
-### Deploy Jekyll Site
+### Manual Deployment
 
-The Jekyll site should be built and deployed to your hosting provider of choice. The worker handles API endpoints while the static site serves the recipe collection.
-
-## Configuration
-
-- **Jekyll Config**: `_config.yml`
-- **Worker Config**: `wrangler.toml`
-- **Styling**: Uses Tailwind CSS with PostCSS processing
+1. **Build CSS:** `yarn build-css`
+2. **Build site:** `JEKYLL_ENV=production bundle exec jekyll build`
+3. **Deploy:** Upload `_site/` contents to your hosting provider
 
 ## Project Structure
 
-- `_recipes/`: Recipe markdown files
-- `_layouts/`: Jekyll layout templates
-- `_includes/`: Reusable Jekyll components
-- `worker.js`: Cloudflare Worker for AI recipe generation
-- `assets/css/`: Compiled CSS styles
+```
+├── _layouts/           # Jekyll layouts
+├── _recipes/          # Recipe markdown files
+├── assets/css/        # CSS files
+│   ├── main.css       # Processed CSS (for GitHub Pages)
+│   └── main-source.css # Source CSS with Tailwind directives
+├── _config.yml        # Jekyll configuration
+├── Gemfile           # Ruby dependencies
+├── package.json      # Node.js dependencies
+└── tailwind.config.js # Tailwind configuration
+```
+
+## Adding Recipes
+
+1. Create a new markdown file in `_recipes/`
+2. Use the front matter format from existing recipes
+3. The recipe will automatically appear in the sidebar
+
+## Troubleshooting
+
+### Styling Issues on GitHub Pages
+
+- Ensure `yarn build-css` was run before committing
+- Check that `assets/css/main.css` contains processed CSS (not `@tailwind` directives)
+- Verify the GitHub Actions deployment succeeded
+
+### Local Development Issues
+
+- Use Ruby 3.3: `chruby ruby-3.3.1` (if using chruby)
+- Clear Jekyll cache: `bundle exec jekyll clean`
+- Rebuild CSS: `yarn build-css`

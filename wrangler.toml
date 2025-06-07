@@ -1,13 +1,10 @@
 # wrangler.toml: Configuration for publishing the Cloudflare Worker
 
 name = "recipe-worker"
-type = "javascript"
-account_id = "4d4b50e9f5680d7b604782701f84b71c"  # Replace with your Cloudflare account ID
+account_id = "834eb2c847e8d6ac26c1f5a00e5c4603"  # Replace with your Cloudflare account ID
 workers_dev = true
+main = "worker.js"
 compatibility_date = "2023-10-01"
-
-[build]
-upload_format = "modules"
 
 [observability.logs]
 enabled = true
@@ -18,7 +15,7 @@ enabled = true
 OPENAI_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 # OPENAI_MODEL = "deepseek-chat"
 OPENAI_MODEL = "deepseek-r1-distill-llama-70b"
-GITHUB_OWNER = "javiersuweijie"   # Replace with your GitHub username or organization
+GITHUB_OWNER = "yuanminglee"   # Replace with your GitHub username or organization
 GITHUB_REPO = "recipe-book"          # Replace with your repository name
 GITHUB_BRANCH = "main"
 
