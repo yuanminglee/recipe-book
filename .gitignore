@@ -2,6 +2,8 @@ _site/
 .sass-cache/
 .jekyll-cache/
 .jekyll-metadata
+.yarn/
+.wrangler/
 node_modules
 
 # Cloudflare Worker environment variables

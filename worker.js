@@ -22,7 +22,52 @@ export default {
       return new Response("No message text provided", { status: 200 });
     }
 
-    const text = message.text;
+    // Handle group chat privacy mode - bot needs to be mentioned or message should be a command
+    const isGroupChat =
+      message.chat.type === "group" || message.chat.type === "supergroup";
+    let text = message.text;
+
+    if (isGroupChat) {
+      const botUsername = env.BOT_USERNAME; // Add this to your environment variables
+      const isMentioned =
+        botUsername &&
+        (text.includes(`@${botUsername}`) ||
+          (message.entities &&
+            message.entities.some(
+              (entity) =>
+                entity.type === "mention" &&
+                text.substring(entity.offset, entity.offset + entity.length) ===
+                  `@${botUsername}`
+            )));
+      const isCommand = text.startsWith("/");
+      const isReplyToBot =
+        message.reply_to_message &&
+        message.reply_to_message.from &&
+        message.reply_to_message.from.is_bot;
+
+      // In groups, only process if bot is mentioned, it's a command, or it's a reply to the bot
+      if (!isMentioned && !isCommand && !isReplyToBot) {
+        console.log(
+          "Message in group doesn't mention bot, isn't a command, and isn't a reply to bot - ignoring"
+        );
+        return new Response("Message ignored - not addressed to bot", {
+          status: 200,
+        });
+      }
+
+      // Remove bot mention from text for processing
+      if (isMentioned && botUsername) {
+        text = text.replace(new RegExp(`@${botUsername}`, "g"), "").trim();
+      }
+    }
+
+    // Send immediate acknowledgment for better user experience
+    await sendTelegramMessage(
+      env.TELEGRAM_BOT_TOKEN,
+      message.chat.id,
+      "🍳 Processing your recipe... This may take a moment!"
+    );
+
     let recipeContent;
     let response;
     // Extract the first URL from the message text
@@ -48,6 +93,7 @@ export default {
       env.OPENAI_API_URL || "https://api.deepseek.com/chat/completions";
     const model = env.OPENAI_MODEL || "deepseek-chat";
     const systemPrompt = `You are an expert in cooking and food. You are given a text output of a recipe webpage and you need to convert it into a markdown file in english that is easy to understand and follow in the following format strictly:
+
 \`\`\`markdown
 ---
 layout: recipe
@@ -56,13 +102,55 @@ description: A quick and easy pasta dish perfect for weeknight dinners
 servings: 4
 prep_time: 15 minutes
 cook_time: 20 minutes
+total_time: 35 minutes
 ingredients:
   - 1 pound (450g) spaghetti
   - "Pasta Sauce":
     - 3 cloves garlic, minced
+    - 2 tablespoons (30ml) olive oil
 notes:
   - You can substitute any pasta shape you prefer
 ---
+
+**Quick Navigation:**
+- [Shopping List](#shopping-list)
+- [Prep Timeline](#prep-timeline) 
+- [Ingredients](#ingredients)
+- [Instructions](#instructions)
+
+## Shopping List
+
+### Produce
+- [ ] 3 cloves garlic
+
+### Pantry
+- [ ] 1 pound (450g) spaghetti
+- [ ] 2 tablespoons (30ml) olive oil
+
+### Spices & Herbs
+- [ ] Red pepper flakes
+
+## Prep Timeline
+
+### 30 minutes before cooking
+- [ ] Fill large pot with salted water and start heating
+- [ ] Mince garlic cloves
+
+### 15 minutes before cooking
+- [ ] Bring water to a rolling boil
+- [ ] Heat olive oil in large skillet
+
+### Start cooking
+- [ ] Add pasta to boiling water
+- [ ] Begin cooking garlic in oil
+
+## Ingredients
+- 1 pound (450g) spaghetti
+- 3 cloves garlic, minced
+- 2 tablespoons (30ml) olive oil
+- Red pepper flakes to taste
+
+## Instructions
 
 1. Bring a large pot of salted water to boil. Add pasta and cook according to package directions.
 
@@ -71,10 +159,19 @@ notes:
 3. Add minced garlic and red pepper flakes to the oil and cook until fragrant, about 1 minute.
 \`\`\`
 
-IMPORTANT:Make sure to follow the format strictly. 
-Ingredients can be nested and grouped into logical parts to help with readability. When nesting ingredients, make sure to surround the key with double quotes.
-Instructions should be below of the yaml section by making sure to close the yaml section with --- after the notes section. 
-If there are no recipe found, do not return any markdown content. Provide metric measurements for weight and volume in brackets.
+IMPORTANT: Follow the format strictly with these requirements:
+1. Include navigation links at the top with anchor links to sections
+2. Generate a shopping list organized by supermarket sections: Produce, Dairy, Meat & Seafood, Pantry, Frozen, Bakery, Spices & Herbs, Beverages, Other
+3. Create a prep timeline with checkboxes showing when to do each task
+4. Include total_time in the YAML frontmatter 
+5. Use checkboxes (- [ ]) for shopping list and prep timeline items
+6. Ingredients can be nested and grouped into logical parts using double quotes for keys
+7. Instructions should be numbered steps below the YAML section
+8. Always close the YAML section with --- 
+9. Provide metric measurements for weight and volume in brackets
+10. If no recipe is found, do not return any markdown content
+11. Organize prep timeline by time before cooking starts (e.g., "30 minutes before", "15 minutes before", "Start cooking")
+12. Include parallel tasks that can be done simultaneously in the prep timeline
 `;
     const prompt = `Start of recipe\n\n${recipeContent}\n\n End of recipe`;
     console.log(prompt);
@@ -135,22 +232,54 @@ If there are no recipe found, do not return any markdown content. Provide metric
     const recipe = match[1];
     console.log(recipe);
 
-    // Encode the markdown content in Base64 use TextEncoder
-    const encoder = new TextEncoder("base64");
+    // Extract title safely with fallback
+    let title = "recipe";
+    const titleMatch = recipe.match(/title:\s*(.+)/);
+    if (titleMatch && titleMatch[1]) {
+      title = titleMatch[1]
+        .trim()
+        .replace(/[^a-zA-Z0-9\s-]/g, "") // Remove special characters
+        .replace(/\s+/g, "-") // Replace spaces with hyphens
+        .toLowerCase()
+        .substring(0, 50); // Limit length
+    }
+
+    // Encode the markdown content in Base64
+    const encoder = new TextEncoder();
     const encodedContent = base64ArrayBuffer(encoder.encode(recipe));
-    const title = recipe.match(/title: (.*)/)[1].replace(/ /g, "-");
 
     // Define the file path for the new markdown file
     const timestamp = Date.now();
     const filePath = `_recipes/${timestamp}-${title}.md`;
 
+    console.log(`Creating file: ${filePath}`);
+
+    // Validate environment variables
+    if (!env.GITHUB_OWNER || !env.GITHUB_REPO || !env.GITHUB_TOKEN) {
+      const missingVars = [];
+      if (!env.GITHUB_OWNER) missingVars.push("GITHUB_OWNER");
+      if (!env.GITHUB_REPO) missingVars.push("GITHUB_REPO");
+      if (!env.GITHUB_TOKEN) missingVars.push("GITHUB_TOKEN");
+
+      const errorMsg = `Missing environment variables: ${missingVars.join(
+        ", "
+      )}`;
+      console.log(errorMsg);
+      sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, errorMsg);
+      return new Response("GitHub configuration error", { status: 200 });
+    }
+
     // Prepare GitHub API URL for creating/updating a file
     const githubApiUrl = `https://api.github.com/repos/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/contents/${filePath}`;
-    const body = JSON.stringify({
-      message: "Add new recipe summary - " + title,
+    const requestBody = {
+      message: `Add new recipe summary - ${title}`,
       content: encodedContent,
       branch: env.GITHUB_BRANCH || "main",
-    });
+    };
+
+    console.log(`GitHub API URL: ${githubApiUrl}`);
+    console.log(`Request body: ${JSON.stringify(requestBody, null, 2)}`);
+
     try {
       const githubResponse = await fetch(githubApiUrl, {
         method: "PUT",
@@ -161,20 +290,27 @@ If there are no recipe found, do not return any markdown content. Provide metric
           "User-Agent": "recipe-worker",
           "X-GitHub-Api-Version": "2022-11-28",
         },
-        body: body,
+        body: JSON.stringify(requestBody),
       });
       if (!githubResponse.ok) {
-        sendTelegramMessage(
-          env.TELEGRAM_BOT_TOKEN,
-          message.chat.id,
-          "GitHub API error: " + githubResponse
-        );
+        const errorText = await githubResponse.text();
+        const errorMsg = `GitHub API error: ${githubResponse.status} ${githubResponse.statusText}\n\nDetails: ${errorText}`;
+        console.log(errorMsg);
+        sendTelegramMessage(env.TELEGRAM_BOT_TOKEN, message.chat.id, errorMsg);
         return new Response("Failed to push markdown file to GitHub", {
           status: 200,
         });
       }
     } catch (err) {
-      console.error(err);
+      const errorMsg = `Error pushing file to GitHub: ${
+        err.message || err.toString()
+      }`;
+      console.error(errorMsg);
+      sendTelegramMessage(
+        env.TELEGRAM_BOT_TOKEN,
+        message.chat.id,
+        `${errorMsg}\n\nPlease check your GitHub configuration:\n- Repository exists\n- Token has write permissions\n- Branch name is correct`
+      );
       return new Response("Error pushing file to GitHub", { status: 200 });
     }
 
@@ -247,13 +383,32 @@ function base64ArrayBuffer(arrayBuffer) {
 async function getRecipeContent(token, url, chatId) {
   // Fetch the recipe content from the URL and extract only plain text using HTMLRewriter
   try {
-    const recipeResponse = await fetch(url);
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+    const recipeResponse = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        Connection: "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+      },
+    });
+
+    clearTimeout(timeoutId);
     if (!recipeResponse.ok) {
-      console.log("Failed to fetch recipe content");
+      const errorMsg = `Failed to fetch recipe content. Status: ${recipeResponse.status} ${recipeResponse.statusText}`;
+      console.log(errorMsg);
       sendTelegramMessage(
         token,
         chatId,
-        "Failed to fetch recipe content: " + recipeResponse
+        `Failed to fetch recipe content: ${recipeResponse.status} ${recipeResponse.statusText}\n\nURL: ${url}`
       );
       return [
         "",
@@ -302,20 +457,28 @@ async function getRecipeContent(token, url, chatId) {
       .join(" ");
     return [recipeContent, null];
   } catch (err) {
-    console.log("Error fetching recipe content: " + err);
-    sendTelegramMessage(token, chatId, "Error fetching recipe content: " + err);
+    let errorMessage = "Error fetching recipe content: ";
+
+    if (err.name === "AbortError") {
+      errorMessage += "Request timed out (30s limit exceeded)";
+    } else if (err.message.includes("fetch")) {
+      errorMessage += "Network error - Unable to connect to website";
+    } else {
+      errorMessage += err.message || err.toString();
+    }
+
+    console.log(errorMessage);
+    sendTelegramMessage(
+      token,
+      chatId,
+      `${errorMessage}\n\nURL: ${url}\n\nTip: Try copying the recipe text directly instead of sending the URL.`
+    );
     return ["", new Response("Error fetching recipe content", { status: 200 })];
   }
 }
 
 // Helper function to send a message to Telegram chat
 async function sendTelegramMessage(token, chatId, messageText) {
-  console.log("Telegram API Request Details:", {
-    url: `https://api.telegram.org/${token}/sendMessage`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: { chat_id: chatId, text: messageText },
-  });
   try {
     const response = await fetch(
       `https://api.telegram.org/${token}/sendMessage`,
