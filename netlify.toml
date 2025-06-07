@@ -1,0 +1,16 @@
+[build]
+  command = "bundle install && yarn install && yarn build-css && bundle exec jekyll build"
+  publish = "_site"
+
+[build.environment]
+  RUBY_VERSION = "3.1"
+  NODE_VERSION = "18"
+
+[[plugins]]
+  package = "netlify-plugin-ruby"
+
+[context.deploy-preview]
+  command = "bundle install && yarn install && yarn build-css && bundle exec jekyll build --future"
+
+[context.branch-deploy]
+  command = "bundle install && yarn install && yarn build-css && bundle exec jekyll build --future"

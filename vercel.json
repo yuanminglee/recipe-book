@@ -1,0 +1,7 @@
+{
+  "buildCommand": "bundle install && yarn install && yarn build-css && bundle exec jekyll build",
+  "outputDirectory": "_site",
+  "installCommand": "bundle install && yarn install",
+  "framework": "jekyll",
+  "version": 2
+}
